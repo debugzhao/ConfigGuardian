@@ -16,6 +16,46 @@ body {
 
 #root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+  background-attachment: fixed;
+}
+
+/* 呼吸灯效果 - 柔和的发光动画 */
+@keyframes breathe {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15),
+                0 0 40px rgba(255, 255, 255, 0.08),
+                0 0 60px rgba(255, 255, 255, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25),
+                0 0 60px rgba(255, 255, 255, 0.12),
+                0 0 90px rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* 呼吸灯效果 - 边框发光 */
+@keyframes breathe-border {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 255, 255, 0.15),
+                0 0 40px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15),
+                0 0 30px rgba(255, 255, 255, 0.2),
+                0 0 60px rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* 呼吸灯类 */
+.breathing-glow {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.breathing-border {
+  animation: breathe-border 3s ease-in-out infinite;
 }
 

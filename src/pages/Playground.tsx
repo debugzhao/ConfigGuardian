@@ -28,22 +28,22 @@ export const Playground: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="bg-white/30 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out breathing-glow">
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
             ConfigGuardian
           </h1>
-          <p className="text-gray-700 text-lg">
-            配置变更风险分析工具 - 完整的配置分析流水线
+          <p className="text-white/80 text-lg drop-shadow-md">
+            基于Parallax AI的配置变更风险分析工具
           </p>
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left: Config Input */}
-          <div className="bg-white/30 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 h-[600px] transition-all duration-300 ease-out">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 h-[600px] transition-all duration-300 ease-out breathing-border">
             <ConfigInput
               value={state.rawConfig}
               onChange={updateConfig}
@@ -51,45 +51,45 @@ export const Playground: React.FC = () => {
           </div>
 
           {/* Right: Actions */}
-          <div className="bg-white/30 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out breathing-border">
             <div className="flex flex-col gap-4">
               <button
                 onClick={runPipeline}
                 disabled={state.isLoading || !state.rawConfig.trim()}
-                className="w-full px-6 py-4 bg-white/20 hover:bg-white/30 backdrop-blur-xl rounded-xl text-gray-800 font-medium
-                         disabled:bg-white/10 disabled:text-gray-400 disabled:cursor-not-allowed
-                         transition-all duration-300 ease-out shadow-lg"
+                className="w-full px-6 py-4 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-xl text-white font-medium
+                         disabled:bg-white/5 disabled:text-white/40 disabled:cursor-not-allowed
+                         transition-all duration-300 ease-out shadow-lg hover:shadow-xl border border-white/10"
               >
                 {state.isLoading ? '运行中...' : '运行全链路'}
               </button>
 
               <button
                 onClick={() => setShowTestData(!showTestData)}
-                className="w-full px-6 py-4 bg-white/20 hover:bg-white/30 backdrop-blur-xl rounded-xl text-gray-800 font-medium
-                         transition-all duration-300 ease-out shadow-lg"
+                className="w-full px-6 py-4 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-xl text-white font-medium
+                         transition-all duration-300 ease-out shadow-lg hover:shadow-xl border border-white/10"
               >
                 {showTestData ? '隐藏' : '显示'}测试数据
               </button>
 
               <button
                 onClick={() => setShowAILogs(!showAILogs)}
-                className="w-full px-6 py-4 bg-white/20 hover:bg-white/30 backdrop-blur-xl rounded-xl text-gray-800 font-medium
-                         transition-all duration-300 ease-out shadow-lg"
+                className="w-full px-6 py-4 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-xl text-white font-medium
+                         transition-all duration-300 ease-out shadow-lg hover:shadow-xl border border-white/10"
               >
                 {showAILogs ? '隐藏' : '显示'}AI 调用日志
               </button>
             </div>
 
             {showTestData && (
-              <div className="mt-6 p-4 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20 shadow-lg transition-all duration-300 ease-out">
-                <h3 className="text-sm font-semibold mb-3 text-gray-800">测试数据集</h3>
+              <div className="mt-6 p-4 bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 shadow-lg transition-all duration-300 ease-out">
+                <h3 className="text-sm font-semibold mb-3 text-white">测试数据集</h3>
                 <div className="space-y-2">
                   {testDataSets.map((testData, index) => (
                     <button
                       key={index}
                       onClick={() => loadTestData(testData)}
-                      className="w-full text-left px-4 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-xl border border-white/20
-                               text-sm text-gray-800 transition-all duration-300 ease-out shadow-md"
+                      className="w-full text-left px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-lg rounded-xl border border-white/20
+                               text-sm text-white transition-all duration-300 ease-out shadow-md hover:shadow-lg"
                     >
                       {testData.name}
                     </button>
@@ -99,14 +99,14 @@ export const Playground: React.FC = () => {
             )}
 
             {state.error && (
-              <div className="mt-6 p-4 bg-red-500/20 backdrop-blur-xl border border-red-300/30 rounded-xl text-sm text-red-800 shadow-lg transition-all duration-300 ease-out">
+              <div className="mt-6 p-4 bg-red-900/30 backdrop-blur-xl border border-red-700/40 rounded-xl text-sm text-red-200 shadow-lg transition-all duration-300 ease-out">
                 {state.error}
               </div>
             )}
 
             {showAILogs && state.aiCallLogs.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-semibold mb-3 text-gray-800">
+                <h3 className="text-sm font-semibold mb-3 text-white">
                   AI 调用日志 ({state.aiCallLogs.length})
                 </h3>
                 <div className="max-h-96 overflow-y-auto">
@@ -118,8 +118,8 @@ export const Playground: React.FC = () => {
         </div>
 
         {/* Pipeline Steps */}
-        <div className="bg-white/30 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">分析流水线</h2>
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 transition-all duration-300 ease-out breathing-glow">
+          <h2 className="text-2xl font-bold text-white mb-6 drop-shadow-lg">分析流水线</h2>
 
           <PipelineStep
             step={1}
