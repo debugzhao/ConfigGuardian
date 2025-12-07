@@ -48,18 +48,18 @@ export const JSONViewer: React.FC<JSONViewerProps> = ({ data, title, collapsed =
     <div className="w-full">
       {title && (
         <div 
-          className="flex items-center justify-between mb-2 cursor-pointer"
+          className="flex items-center justify-between mb-3 cursor-pointer transition-all duration-300 ease-out"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          <h3 className="text-sm font-semibold text-apple-gray-700">{title}</h3>
-          <span className="text-apple-gray-500 text-xs">
+          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+          <span className="text-gray-600 text-xs hover:text-gray-800 transition-colors">
             {isCollapsed ? '展开' : '收起'}
           </span>
         </div>
       )}
       {!isCollapsed && (
-        <div className="bg-apple-gray-50 rounded-lg p-4 border border-apple-gray-200">
-          <pre className="text-xs font-mono text-apple-gray-800 overflow-x-auto whitespace-pre-wrap break-words">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl p-5 border border-white/20 shadow-lg transition-all duration-300 ease-out">
+          <pre className="text-xs font-mono text-gray-800 overflow-x-auto whitespace-pre-wrap break-words">
             {jsonString}
           </pre>
         </div>

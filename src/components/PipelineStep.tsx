@@ -27,13 +27,13 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
   const getStatusColor = () => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 border-green-300 text-green-800';
+        return 'bg-green-500/20 border-green-400/30 text-green-800';
       case 'running':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
+        return 'bg-blue-500/20 border-blue-400/30 text-blue-800';
       case 'error':
-        return 'bg-red-100 border-red-300 text-red-800';
+        return 'bg-red-500/20 border-red-400/30 text-red-800';
       default:
-        return 'bg-apple-gray-100 border-apple-gray-300 text-apple-gray-600';
+        return 'bg-white/20 border-white/20 text-gray-600';
     }
   };
 
@@ -51,22 +51,22 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
   };
 
   return (
-    <div className={`border-2 rounded-xl p-4 mb-4 transition-all ${getStatusColor()}`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white border-2 border-current flex items-center justify-center font-bold text-sm">
+    <div className={`bg-white/30 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-6 mb-6 transition-all duration-300 ease-out ${getStatusColor()}`}>
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-white/40 backdrop-blur-lg border-2 border-white/30 flex items-center justify-center font-bold text-base shadow-lg">
             {step}
           </div>
           <div>
-            <h3 className="font-semibold text-base">{title}</h3>
-            <p className="text-sm opacity-80 mt-1">{description}</p>
+            <h3 className="font-semibold text-lg text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
         </div>
-        <div className="text-2xl">{getStatusIcon()}</div>
+        <div className="text-3xl">{getStatusIcon()}</div>
       </div>
 
       {error && (
-        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+        <div className="mb-4 p-4 bg-red-500/20 backdrop-blur-lg border border-red-400/30 rounded-xl text-sm text-red-800 shadow-lg transition-all duration-300 ease-out">
           {error}
         </div>
       )}
@@ -75,12 +75,12 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
       {(step === 4 || step === 5) && streamingText && 
        ((step === 4 && streamingType === 'risk_analysis') || 
         (step === 5 && streamingType === 'fix_suggestion')) && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+        <div className="mb-4 p-5 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 rounded-xl shadow-lg transition-all duration-300 ease-out">
+          <h4 className="text-sm font-semibold text-blue-800 mb-3">
             {step === 4 ? '🔍 AI 风险评估中...' : '💡 AI 修复建议生成中...'}
           </h4>
-          <div className="bg-white rounded p-3 border border-blue-200 max-h-64 overflow-y-auto">
-            <pre className="text-xs font-mono text-apple-gray-800 whitespace-pre-wrap break-words">
+          <div className="bg-white/20 backdrop-blur-lg rounded-xl p-4 border border-white/20 max-h-64 overflow-y-auto shadow-inner">
+            <pre className="text-xs font-mono text-gray-800 whitespace-pre-wrap break-words">
               {streamingText}
             </pre>
             {status === 'running' && (
@@ -90,7 +90,7 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {input !== undefined && (
           <div>
             <JSONViewer data={input} title="输入 (Input)" collapsed={true} />
