@@ -267,7 +267,7 @@ export class DiffAnalyzer {
   /**
    * 评估属性影响
    */
-  private static assessPropertyImpact(key: string, value: any): 'high' | 'medium' | 'low' {
+  private static assessPropertyImpact(key: string, _value: any): 'high' | 'medium' | 'low' {
     const securityKeys = ['password', 'secret', 'key', 'token', 'auth', 'permission'];
     if (securityKeys.some((sk) => key.toLowerCase().includes(sk))) {
       return 'high';

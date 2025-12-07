@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { ConfigInput } from '../components/ConfigInput';
 import { PipelineStep } from '../components/PipelineStep';
+import { AICallLogViewer } from '../components/AICallLogViewer';
 import { usePipeline } from '../hooks/usePipeline';
 import { testDataSets } from '../data/testData';
 
 export const Playground: React.FC = () => {
   const { state, updateConfig, runPipeline, loadTestData } = usePipeline();
   const [showTestData, setShowTestData] = useState(false);
+  const [showAILogs, setShowAILogs] = useState(true);
 
   const getStepStatus = (stepNumber: number): 'pending' | 'running' | 'completed' | 'error' => {
     if (state.error && stepNumber <= 3) return 'error';
@@ -68,6 +70,14 @@ export const Playground: React.FC = () => {
               >
                 {showTestData ? '隐藏' : '显示'}测试数据
               </button>
+
+              <button
+                onClick={() => setShowAILogs(!showAILogs)}
+                className="w-full px-6 py-3 bg-apple-gray-100 text-apple-gray-700 rounded-lg font-semibold
+                         hover:bg-apple-gray-200 transition-colors"
+              >
+                {showAILogs ? '隐藏' : '显示'}AI 调用日志
+              </button>
             </div>
 
             {showTestData && (
@@ -91,6 +101,17 @@ export const Playground: React.FC = () => {
             {state.error && (
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 {state.error}
+              </div>
+            )}
+
+            {showAILogs && state.aiCallLogs.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold mb-3 text-apple-gray-700">
+                  AI 调用日志 ({state.aiCallLogs.length})
+                </h3>
+                <div className="max-h-96 overflow-y-auto">
+                  <AICallLogViewer logs={state.aiCallLogs} />
+                </div>
               </div>
             )}
           </div>

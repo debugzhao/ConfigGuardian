@@ -117,6 +117,24 @@ export interface FixSuggestion {
   };
 }
 
+export interface AICallLog {
+  timestamp: string;
+  type: 'risk_analysis' | 'fix_suggestion';
+  request: {
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    body: any;
+  };
+  response: {
+    status?: number;
+    statusText?: string;
+    body?: any;
+    error?: string;
+  };
+  duration?: number;
+}
+
 export interface PipelineState {
   rawConfig: string;
   astResult: ASTResult | null;
@@ -126,5 +144,6 @@ export interface PipelineState {
   fixSuggestion: FixSuggestion | null;
   isLoading: boolean;
   error: string | null;
+  aiCallLogs: AICallLog[];
 }
 
