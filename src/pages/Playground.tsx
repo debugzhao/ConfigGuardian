@@ -162,6 +162,8 @@ export const Playground: React.FC = () => {
             } : undefined}
             output={state.riskReport || undefined}
             status={getStepStatus(4)}
+            streamingText={state.streamingType === 'risk_analysis' ? state.streamingText : undefined}
+            streamingType={state.streamingType}
           />
 
           <PipelineStep
@@ -171,6 +173,8 @@ export const Playground: React.FC = () => {
             input={state.riskReport || undefined}
             output={state.fixSuggestion || undefined}
             status={getStepStatus(5)}
+            streamingText={state.streamingType === 'fix_suggestion' ? state.streamingText : undefined}
+            streamingType={state.streamingType}
           />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { PipelineState, ASTResult, ExecutionGraph, DiffResult, RiskReport, FixSu
 import { ASTParser } from '../core/astParser';
 import { ExecutionSimulator } from '../core/executionSimulator';
 import { DiffAnalyzer } from '../core/diffAnalyzer';
-import { AIService, setAICallLogCallback } from '../api/aiService';
+import { AIService, setAICallLogCallback, setStreamingCallback } from '../api/aiService';
 
 export const usePipeline = () => {
   const [state, setState] = useState<PipelineState>({
@@ -16,6 +16,8 @@ export const usePipeline = () => {
     isLoading: false,
     error: null,
     aiCallLogs: [],
+    streamingText: '',
+    streamingType: null,
   });
 
   // 设置 AI 调用日志回调
@@ -24,6 +26,15 @@ export const usePipeline = () => {
       setState((prev) => ({
         ...prev,
         aiCallLogs: [...prev.aiCallLogs, log],
+      }));
+    });
+
+    // 设置流式输出回调
+    setStreamingCallback((text: string, type: 'risk_analysis' | 'fix_suggestion') => {
+      setState((prev) => ({
+        ...prev,
+        streamingText: text,
+        streamingType: type,
       }));
     });
   }, []);
@@ -42,6 +53,8 @@ export const usePipeline = () => {
       fixSuggestion: null,
       error: null,
       aiCallLogs: [],
+      streamingText: '',
+      streamingType: null,
     }));
   }, []);
 

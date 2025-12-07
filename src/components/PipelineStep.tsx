@@ -9,6 +9,8 @@ interface PipelineStepProps {
   output?: any;
   status: 'pending' | 'running' | 'completed' | 'error';
   error?: string;
+  streamingText?: string;
+  streamingType?: 'risk_analysis' | 'fix_suggestion' | null;
 }
 
 export const PipelineStep: React.FC<PipelineStepProps> = ({
@@ -19,6 +21,8 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
   output,
   status,
   error,
+  streamingText,
+  streamingType,
 }) => {
   const getStatusColor = () => {
     switch (status) {
@@ -64,6 +68,25 @@ export const PipelineStep: React.FC<PipelineStepProps> = ({
       {error && (
         <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
           {error}
+        </div>
+      )}
+
+      {/* 流式输出显示（仅在第4、5步显示） */}
+      {(step === 4 || step === 5) && streamingText && 
+       ((step === 4 && streamingType === 'risk_analysis') || 
+        (step === 5 && streamingType === 'fix_suggestion')) && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+            {step === 4 ? '🔍 AI 风险评估中...' : '💡 AI 修复建议生成中...'}
+          </h4>
+          <div className="bg-white rounded p-3 border border-blue-200 max-h-64 overflow-y-auto">
+            <pre className="text-xs font-mono text-apple-gray-800 whitespace-pre-wrap break-words">
+              {streamingText}
+            </pre>
+            {status === 'running' && (
+              <span className="inline-block w-2 h-4 bg-blue-500 ml-1 animate-pulse" />
+            )}
+          </div>
         </div>
       )}
 

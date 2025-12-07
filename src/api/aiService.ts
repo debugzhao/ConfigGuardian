@@ -5,8 +5,15 @@ const AI_API_URL = 'http://localhost:3001/v1/chat/completions';
 // 用于存储 AI 调用日志的回调函数
 let aiCallLogCallback: ((log: AICallLog) => void) | null = null;
 
+// 用于流式输出文本的回调函数
+let streamingCallback: ((text: string, type: 'risk_analysis' | 'fix_suggestion') => void) | null = null;
+
 export const setAICallLogCallback = (callback: (log: AICallLog) => void) => {
   aiCallLogCallback = callback;
+};
+
+export const setStreamingCallback = (callback: (text: string, type: 'risk_analysis' | 'fix_suggestion') => void) => {
+  streamingCallback = callback;
 };
 
 /**
@@ -87,6 +94,7 @@ export class AIService {
       const decoder = new TextDecoder();
       let fullResponse = '';
       const chunks: string[] = [];
+      let accumulatedText = ''; // 用于累积文本以便翻译
 
       if (reader) {
         while (true) {
@@ -105,12 +113,34 @@ export class AIService {
               try {
                 const parsed = JSON.parse(data);
                 const content = parsed.choices?.[0]?.delta?.content || '';
-                fullResponse += content;
+                if (content) {
+                  fullResponse += content;
+                  accumulatedText += content;
+                  
+                  // 实时流式输出（原始文本）
+                  if (streamingCallback) {
+                    streamingCallback(fullResponse, type);
+                  }
+                  
+                  // 每累积一定字符数或遇到句号时，实时输出
+                  if (accumulatedText.length > 30 || accumulatedText.endsWith('.') || accumulatedText.endsWith('。')) {
+                    // 实时流式输出原始文本（后续会翻译）
+                    if (streamingCallback) {
+                      streamingCallback(fullResponse, type);
+                    }
+                    accumulatedText = '';
+                  }
+                }
               } catch {
                 // 忽略解析错误
               }
             }
           }
+        }
+        
+        // 处理剩余的文本
+        if (accumulatedText.length > 0 && streamingCallback) {
+          streamingCallback(fullResponse, type);
         }
       }
 
@@ -135,6 +165,22 @@ export class AIService {
         aiCallLogCallback(log);
       }
 
+      // 最终翻译完整响应并输出
+      if (fullResponse.trim() && streamingCallback) {
+        try {
+          // 尝试解析 JSON 并翻译
+          const parsed = JSON.parse(fullResponse);
+          const translated = this.translateJSONResponse(parsed, type);
+          streamingCallback(JSON.stringify(translated, null, 2), type);
+        } catch {
+          // 如果不是 JSON，直接翻译文本
+          const translated = await this.translateToChinese(fullResponse);
+          if (translated) {
+            streamingCallback(translated, type);
+          }
+        }
+      }
+      
       return fullResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -163,6 +209,195 @@ export class AIService {
       
       return mockResponse;
     }
+  }
+
+  /**
+   * 翻译文本为中文
+   */
+  private static async translateToChinese(text: string): Promise<string> {
+    try {
+      // 尝试解析 JSON
+      const parsed = JSON.parse(text);
+      
+      // 递归翻译对象中的字符串
+      const translateObject = (obj: any): any => {
+        if (typeof obj === 'string') {
+          return this.translateString(obj);
+        } else if (Array.isArray(obj)) {
+          return obj.map(translateObject);
+        } else if (obj && typeof obj === 'object') {
+          const translated: any = {};
+          for (const key in obj) {
+            translated[key] = translateObject(obj[key]);
+          }
+          return translated;
+        }
+        return obj;
+      };
+      
+      const translated = translateObject(parsed);
+      return JSON.stringify(translated, null, 2);
+    } catch {
+      // 如果不是 JSON，直接翻译字符串
+      return this.translateString(text);
+    }
+  }
+
+  /**
+   * 翻译单个字符串
+   */
+  private static translateString(text: string): string {
+    // 简单的关键词翻译映射
+    const translations: Record<string, string> = {
+      'risk': '风险',
+      'security': '安全',
+      'performance': '性能',
+      'reliability': '可靠性',
+      'compatibility': '兼容性',
+      'critical': '严重',
+      'high': '高',
+      'medium': '中',
+      'low': '低',
+      'safe': '安全',
+      'title': '标题',
+      'description': '描述',
+      'recommendation': '建议',
+      'affectedPaths': '受影响路径',
+      'fix': '修复',
+      'fixes': '修复建议',
+      'patches': '补丁',
+      'operation': '操作',
+      'replace': '替换',
+      'add': '添加',
+      'remove': '删除',
+      'confidence': '置信度',
+      'autoApplicable': '可自动应用',
+      'summary': '摘要',
+      'totalFixes': '总修复数',
+      'manualReview': '需要人工审查',
+      'Potential Security Risk Detected': '检测到潜在安全风险',
+      'Configuration change may expose sensitive data or create security vulnerabilities.': '配置变更可能暴露敏感数据或造成安全漏洞。',
+      'Review access controls and ensure proper encryption is in place.': '检查访问控制并确保已实施适当的加密。',
+      'Apply Security Patch': '应用安全补丁',
+      'Update configuration to use secure defaults.': '更新配置以使用安全默认值。',
+      'Replace plaintext password with secure reference': '将明文密码替换为安全引用',
+    };
+
+    // 如果文本已经是中文或包含中文字符，直接返回
+    if (/[\u4e00-\u9fa5]/.test(text)) {
+      return text;
+    }
+
+    // 尝试翻译常见短语
+    let translated = text;
+    for (const [en, zh] of Object.entries(translations)) {
+      const regex = new RegExp(en, 'gi');
+      translated = translated.replace(regex, zh);
+    }
+
+    // 如果翻译后没有变化，尝试更智能的翻译
+    if (translated === text && text.length > 10) {
+      // 对于较长的文本，保持原样（实际项目中应该调用翻译 API）
+      return text;
+    }
+
+    return translated;
+  }
+
+  /**
+   * 翻译 JSON 响应
+   */
+  private static translateJSONResponse(
+    parsed: any,
+    type: 'risk_analysis' | 'fix_suggestion'
+  ): any {
+    if (type === 'risk_analysis') {
+      return this.translateRiskReport(parsed);
+    } else {
+      return this.translateFixSuggestion(parsed);
+    }
+  }
+
+  /**
+   * 翻译风险报告为中文
+   */
+  private static translateRiskReport(report: any): any {
+    if (!report || !report.risks) {
+      return report;
+    }
+    
+    return {
+      risks: report.risks.map((risk: any) => ({
+        ...risk,
+        category: this.translateCategory(risk.category),
+        severity: this.translateSeverity(risk.severity),
+        title: risk.title && !risk.title.includes('风险') ? `${risk.title}风险` : risk.title,
+      })),
+      summary: report.summary || {},
+      overallRiskLevel: this.translateSeverity(report.overallRiskLevel || 'safe'),
+    };
+  }
+
+  /**
+   * 翻译修复建议为中文
+   */
+  private static translateFixSuggestion(suggestion: any): any {
+    if (!suggestion || !suggestion.fixes) {
+      return suggestion;
+    }
+    
+    return {
+      fixes: suggestion.fixes.map((fix: any) => ({
+        ...fix,
+        title: fix.title && !fix.title.includes('修复') ? `修复: ${fix.title}` : fix.title,
+        description: fix.description || '应用此修复建议',
+        patches: (fix.patches || []).map((patch: any) => ({
+          ...patch,
+          operation: this.translateOperation(patch.operation),
+          description: patch.description || '应用此补丁',
+        })),
+      })),
+      summary: suggestion.summary || {},
+    };
+  }
+
+  /**
+   * 翻译类别
+   */
+  private static translateCategory(category: string): string {
+    const map: Record<string, string> = {
+      'security': '安全',
+      'performance': '性能',
+      'reliability': '可靠性',
+      'compatibility': '兼容性',
+    };
+    return map[category] || category;
+  }
+
+  /**
+   * 翻译严重程度
+   */
+  private static translateSeverity(severity: string): string {
+    const map: Record<string, string> = {
+      'critical': '严重',
+      'high': '高',
+      'medium': '中',
+      'low': '低',
+      'safe': '安全',
+    };
+    return map[severity] || severity;
+  }
+
+  /**
+   * 翻译操作类型
+   */
+  private static translateOperation(operation: string): string {
+    const map: Record<string, string> = {
+      'replace': '替换',
+      'add': '添加',
+      'remove': '删除',
+    };
+    return map[operation] || operation;
   }
 
   /**
@@ -300,14 +535,18 @@ export class AIService {
         }
       });
       
-      return JSON.stringify({
+      const result = {
         fixes,
         summary: {
           totalFixes: fixes.length,
           autoApplicable: fixes.filter(f => f.autoApplicable).length,
           manualReview: fixes.filter(f => !f.autoApplicable).length,
         },
-      }, null, 2);
+      };
+      
+      // 翻译为中文
+      const translated = this.translateFixSuggestion(result);
+      return JSON.stringify(translated, null, 2);
     }
 
     return '{}';

@@ -145,5 +145,7 @@ export interface PipelineState {
   isLoading: boolean;
   error: string | null;
   aiCallLogs: AICallLog[];
+  streamingText: string; // 流式输出文本
+  streamingType: 'risk_analysis' | 'fix_suggestion' | null; // 当前流式输出的类型
 }
 
